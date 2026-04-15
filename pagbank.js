@@ -39,7 +39,8 @@ function montarTelefone(telefone) {
 // ────────────────────────────────────────────────────────
 router.post("/pix", async (req, res) => {
   try {
-    const { nome, email, cpf, telefone, tipo } = req.body;
+    // 1. Alterado: Capturando todos os campos novos
+    const { nome, email, cpf, telefone, rg, comunidade, indicacao, tipo } = req.body;
 
     if (!nome || !email || !cpf || !tipo) {
       return res.status(400).json({ erro: "Campos obrigatórios: nome, email, cpf, tipo" });
@@ -56,8 +57,11 @@ router.post("/pix", async (req, res) => {
 
     const expiracao = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
+    // 2. Alterado: Empacotando dados no ID
+    const refId = `ADPAZ|${rg || "-"}|${comunidade || "-"}|${(indicacao || "-").replace(/\|/g, "")}|${telefone || "-"}|${tipo || "-"}`;
+
     const payload = {
-      reference_id: `arraiadapaz-${Date.now()}`,
+      reference_id: refId, // Usando o nosso ID empacotado
       customer: {
         name:   nome,
         email:  email,
@@ -113,7 +117,8 @@ router.post("/pix", async (req, res) => {
 // ────────────────────────────────────────────────────────
 router.post("/cartao", async (req, res) => {
   try {
-    const { nome, email, cpf, telefone, tipo } = req.body;
+    // 1. Alterado: Capturando todos os campos novos
+    const { nome, email, cpf, telefone, rg, comunidade, indicacao, tipo } = req.body;
 
     if (!nome || !email || !cpf || !tipo) {
       return res.status(400).json({ erro: "Campos obrigatórios: nome, email, cpf, tipo" });
@@ -128,8 +133,11 @@ router.post("/cartao", async (req, res) => {
       ? "Mesa – Arraiá da Paz 2026"
       : "Ingresso Individual – Arraiá da Paz 2026";
 
+    // 2. Alterado: Empacotando dados no ID
+    const refId = `ADPAZ|${rg || "-"}|${comunidade || "-"}|${(indicacao || "-").replace(/\|/g, "")}|${telefone || "-"}|${tipo || "-"}`;
+
     const payload = {
-      reference_id: `arraiadapaz-${Date.now()}`,
+      reference_id: refId, // Usando o nosso ID empacotado
       customer: {
         name:   nome,
         email:  email,
