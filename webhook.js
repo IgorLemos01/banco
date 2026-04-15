@@ -25,21 +25,38 @@ router.post("/pagbank", async (req, res) => {
     }
 
     const customer = order.customer || {};
-    const item     = order.items?.[0] || {};
-    const tipo     = item.reference_id === "mesa" ? "Mesa" : "Ingresso Individual";
-    const valor    = ((charge?.amount?.value || 0) / 100).toFixed(2);
-    const metodo   = charge?.payment_method?.type || "–";
+    
+    // 1. Desempacotando os dados embutidos no ID do pedido (Criado no pagbank.js)
+    const refId = order.reference_id || "";
+    const parts = refId.split("|");
+    
+    // O array parts fica: [ "ADPAZ", RG, Comunidade, Indicacao, Telefone, Tipo ]
+    const rgFormatado  = parts[1] || "–";
+    const comFormatada = parts[2] || "–";
+    const indFormatada = parts[3] || "–";
+    const telFormatado = parts[4] || customer.phones?.[0]?.number || "–";
+    const tipoEmbutido = parts[5] || "–";
 
+    // Fallback de tipo caso falhe o desempacotamento
+    const tipoFinal = tipoEmbutido !== "–" ? tipoEmbutido : (order.items?.[0]?.reference_id === "mesa" ? "Mesa" : "Ingresso Individual");
+    const valor     = ((charge?.amount?.value || 0) / 100).toFixed(2);
+    const metodo    = charge?.payment_method?.type || "–";
+
+    // 2. Atualizando o objeto dados com as novas colunas
     const dados = {
-      order_id: order.id,
-      nome:     customer.name  || "–",
-      email:    customer.email || "–",
-      cpf:      customer.tax_id || "–",
-      tipo,
-      valor,
-      metodo,
-      pago_em:  charge?.paid_at || new Date().toISOString(),
-      status:   "Pago ✅",
+      order_id:   order.id,
+      nome:       customer.name  || "–",
+      email:      customer.email || "–",
+      cpf:        customer.tax_id || "–",
+      telefone:   telFormatado,
+      rg:         rgFormatado,
+      comunidade: comFormatada,
+      indicacao:  indFormatada,
+      tipo:       tipoFinal,
+      valor:      valor,
+      metodo:     metodo,
+      pago_em:    charge?.paid_at || new Date().toISOString(),
+      status:     "Pago ✅",
     };
 
     console.log("✅ Pagamento confirmado, processando:", dados);
