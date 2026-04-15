@@ -2,8 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors    = require("cors");
 
-const pagbankRoutes = require("./routes/pagbank");
-const webhookRoutes = require("./routes/webhook");
+const pagbankRoutes = require("./pagbank");
+const webhookRoutes = require("./webhook");
 
 const app = express();
 
