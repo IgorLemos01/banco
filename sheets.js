@@ -1,60 +1,24 @@
-const { google } = require("googleapis");
+const axios = require("axios");
 
-/**
- * Registra pagamento confirmado na planilha Google Sheets
- * @param {Object} dados - { order_id, nome, email, cpf, tipo, valor, metodo, pago_em, status }
- */
+// URL oficial do seu Google Apps Script
+const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL || "https://script.google.com/macros/s/AKfycbz_Sz_tc06wopqbjYbv-gn0yA4o9htEHHNNS5l5bPLjwcWcCQ7Sc7IvUGjLAQ2ADrlf/exec";
+
 async function registrarNaPlanilha(dados) {
-  const sheetId = process.env.SHEET_ID;
-
-  // Se não tiver SHEET_ID configurado, pula silenciosamente
-  if (!sheetId || sheetId === "INSIRA_AQUI_O_ID_DA_PLANILHA") {
-    console.warn("⚠️ SHEET_ID não configurado, pulando registro na planilha.");
-    return;
-  }
-
-  let serviceAccount;
   try {
-    const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-    // Remove aspas duplas escapadas caso o JSON venha com ""chave""
-    const cleaned = raw.replace(/""/g, '"').replace(/^"|"$/g, "");
-    serviceAccount = JSON.parse(cleaned);
-  } catch (e) {
-    console.error("❌ GOOGLE_SERVICE_ACCOUNT_JSON inválido:", e.message);
-    return;
+    console.log("📤 Enviando dados para o Apps Script...");
+    
+    const resposta = await axios.post(APPS_SCRIPT_URL, dados, {
+      headers: { "Content-Type": "application/json" }
+    });
+
+    if (resposta.data && resposta.data.ok) {
+      console.log("✅ Dados salvos na planilha com sucesso!");
+    } else {
+      console.error("⚠️ Apps Script retornou um erro:", resposta.data.erro);
+    }
+  } catch (error) {
+    console.error("❌ Falha de comunicação com o Apps Script:", error.message);
   }
-
-  const auth = new google.auth.GoogleAuth({
-    credentials: serviceAccount,
-    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-  });
-
-  const sheets = google.sheets({ version: "v4", auth });
-
-  const dataFormatada = new Date(dados.pago_em).toLocaleString("pt-BR", {
-    timeZone: "America/Recife",
-  });
-
-  const linha = [
-    dados.order_id,
-    dados.nome,
-    dados.email,
-    dados.cpf,
-    dados.tipo,
-    `R$ ${dados.valor}`,
-    dados.metodo,
-    dataFormatada,
-    dados.status,
-  ];
-
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: sheetId,
-    range:         "Pagina1!A:I",
-    valueInputOption: "USER_ENTERED",
-    requestBody:   { values: [linha] },
-  });
-
-  console.log(`📊 Planilha atualizada: ${dados.nome}`);
 }
 
 module.exports = { registrarNaPlanilha };
