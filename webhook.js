@@ -1,8 +1,8 @@
 const express = require("express");
 const router  = express.Router();
 
-const { enviarEmailConfirmacao } = require("../email");
-const { registrarNaPlanilha }    = require("../sheets");
+const { enviarEmailConfirmacao } = require("./email");
+const { registrarNaPlanilha }    = require("./sheets");
 
 // ────────────────────────────────────────────────────────
 // POST /webhook/pagbank
