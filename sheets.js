@@ -49,7 +49,7 @@ async function registrarNaPlanilha(dados) {
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: sheetId,
-    range:         "Inscrições!A:I",
+    range:         "Pagina1!A:I",
     valueInputOption: "USER_ENTERED",
     requestBody:   { values: [linha] },
   });
