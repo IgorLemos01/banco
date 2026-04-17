@@ -137,7 +137,7 @@ router.post("/cartao", async (req, res) => {
     const refId = `ADPAZ|${rg || "-"}|${comunidade || "-"}|${(indicacao || "-").replace(/\|/g, "")}|${telefone || "-"}|${tipo || "-"}`;
 
     const payload = {
-      reference_id: refId, // Usando o nosso ID empacotado
+      reference_id: refId,
       customer: {
         name:   nome,
         email:  email,
@@ -154,8 +154,9 @@ router.post("/cartao", async (req, res) => {
         { type: "CREDIT_CARD" },
         { type: "DEBIT_CARD" },
       ],
-      redirect_url:      `${SITE_URL}?pagamento=sucesso`,
-      notification_urls: [`${SITE_URL}/webhook/pagbank`],
+      // Adicionamos um fallback: se a variável SITE_URL falhar, ele usa o link da Vercel
+      redirect_url:      `${process.env.SITE_URL || 'https://arraiadapaz.vercel.app'}/sucesso`,
+      notification_urls: [`${process.env.SITE_URL || 'https://painel-banco.mvnptn.easypanel.host'}/webhook/pagbank`],
     };
 
     console.log("📤 Criando Checkout Cartão:", JSON.stringify(payload, null, 2));
