@@ -156,7 +156,7 @@ router.post("/cartao", async (req, res) => {
       ],
       // Adicionamos um fallback: se a variável SITE_URL falhar, ele usa o link da Vercel
       redirect_url:      `${process.env.SITE_URL || 'https://arraiadapaz.vercel.app'}/sucesso`,
-      notification_urls: [`${process.env.SITE_URL || 'https://painel-banco.mvnptn.easypanel.host'}/webhook/pagbank`],
+      notification_urls: [`${process.env.API_URL || 'https://painel-banco.mvnptn.easypanel.host'}/webhook/pagbank`],
     };
 
     console.log("📤 Criando Checkout Cartão:", JSON.stringify(payload, null, 2));
